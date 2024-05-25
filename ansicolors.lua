@@ -27,8 +27,20 @@ local function isWindows()
   return type(package) == 'table' and type(package.config) == 'string' and package.config:sub(1,1) == '\\'
 end
 
-local supported = not isWindows()
-if isWindows() then supported = os.getenv("ANSICON") end
+local enabled = not isWindows()
+if isWindows() then 
+  enabled = os.getenv("ANSICON") 
+  if not enabled then
+    local ok, sys = pcall(require, 'system')
+    if ok and sys.getconsoleflags then
+      local flags = sys.getconsoleflags(io.stdout)
+      if flags then
+        enabled = flags:has_all_of(sys.COF_VIRTUAL_TERMINAL_PROCESSING)
+      end
+    end
+  end
+end
+
 
 local keys = {
   -- reset
@@ -70,7 +82,7 @@ end
 
 local function escapeKeys(str)
 
-  if not supported then return "" end
+  if not enabled then return "" end
 
   local buffer = {}
   local number
@@ -97,4 +109,11 @@ local function ansicolors( str )
 end
 
 
-return setmetatable({noReset = replaceCodes}, {__call = function (_, str) return ansicolors (str) end})
+return setmetatable({
+  noReset = replaceCodes,
+  enable = function(val) enabled = not not val end,
+}, {
+  __call = function(_, str) 
+    return ansicolors(str) 
+  end,
+})

@@ -20,6 +20,11 @@ h2. Usage
   print(colors('%{red}hello'))
   print(colors('%{redbg}hello%{reset}'))
   print(colors('%{bright red underline}hello'))
+
+  colors.enable(false)
+  print(colors('%{red}this is printed plain since coloring is disabled'))
+  colors.enable(true)
+  print(colors('%{red}this is printed in red again'))
 </pre>
 
 The @colors@ function makes sure that color attributes are reset at each end of the generated string. If you want to generate complex strings piece-by-piece, use @colors.noReset@, which works exactly the same, but without adding the reset codes at each end of the string.
@@ -35,7 +40,13 @@ Notice that the tests will only work on an ANSI-compatible machine (windows isn'
 
 h2. Windows
 
-Windows console, by default, isn't capable of handling ANSI color codes correctly. This library tries to detect whether it is on a windows machine (by looking at package.path) and in that case it suppresses all ANSI control characters (the text appears devoid of color, but legible).
+Windows console, by default, isn't capable of handling ANSI color codes correctly. This library tries to detect whether it is on a Windows machine (by looking at package.path) and in that case it suppresses all ANSI control characters (the text appears devoid of color, but legible).
+
+By default coloring is disabled on Windows, except if:
+
+* Environment variable @ANSICON@ has been set
+* Module @luasystem@ is available and terminal processing has been enabled on @io.stdout@
+* It is manually enabled by calling @enable(true)@
 
 h2. Valid attribute list:
 
